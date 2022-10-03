@@ -1,0 +1,10 @@
+{
+    "typescript.updateImportsOnFileMove.enabled": "always",
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.codeActionsOnSave": {
+        "source.addMissingImports": true,
+        "source.fixAll.eslint": true,
+    },
+    "editor.snippetSuggestions": "bottom",
+}

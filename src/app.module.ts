@@ -4,8 +4,8 @@ import { AppService } from './app.service';
 import { WeatherReportsModule } from './weather-reports/weather-reports.module';
 
 @Module({
-  imports: [WeatherReportsModule],
-  controllers: [AppController],
-  providers: [AppService],
+	imports: [WeatherReportsModule],
+	controllers: [AppController],
+	providers: [AppService],
 })
 export class AppModule {}
