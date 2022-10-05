@@ -5,11 +5,11 @@ import { WeatherReport } from './entities/weather-report.entity';
 export class WeatherReportsService {
 	// Temp local db until connected to actual db
 	private weatherReports: WeatherReport[] = [
-		{ id: 1, postcode: 'BS12AB' },
-		{ id: 2, postcode: 'BS12AB' },
-		{ id: 3, postcode: 'BS13CD' },
-		{ id: 4, postcode: 'BS14EF' },
-		{ id: 5, postcode: 'BS12AB' },
+		{ id: 1, postcode: 'BS12AB', dateTime: new Date() },
+		{ id: 2, postcode: 'BS12AB', dateTime: new Date() },
+		{ id: 3, postcode: 'BS13CD', dateTime: new Date() },
+		{ id: 4, postcode: 'BS14EF', dateTime: new Date() },
+		{ id: 5, postcode: 'BS12AB', dateTime: new Date() },
 	];
 
 	findAll(): WeatherReport[] {

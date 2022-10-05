@@ -6,4 +6,7 @@ export class WeatherReport {
 
 	@ApiProperty()
 	postcode: string;
+
+	@ApiProperty()
+	dateTime: Date;
 }
