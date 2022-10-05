@@ -19,6 +19,8 @@ export class WeatherReportsController {
 	@ApiBadRequestResponse()
 	@Get(':postcode')
 	getWeatherReportsByPostCode(@Param('postcode') postcode: string, @Query() weatherReportsByPostcodeDto: WeatherReportsByPostcodeDto): WeatherReport[] {
-		return this.weatherReportsService.findByPostcode(postcode, new Date(weatherReportsByPostcodeDto.from), new Date(weatherReportsByPostcodeDto.to));
+		const from = weatherReportsByPostcodeDto.from ? new Date(weatherReportsByPostcodeDto.from) : null;
+		const to = weatherReportsByPostcodeDto.to ? new Date(weatherReportsByPostcodeDto.to) : null;
+		return this.weatherReportsService.findByPostcode(postcode, from, to);
 	}
 }
