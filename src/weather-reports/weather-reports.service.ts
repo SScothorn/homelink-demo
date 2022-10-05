@@ -16,7 +16,7 @@ export class WeatherReportsService {
 		return this.weatherReports;
 	}
 
-	findByPostcode(postcode: string): WeatherReport[] {
+	findByPostcode(postcode: string, from?: Date, to?: Date): WeatherReport[] {
 		return this.weatherReports.filter((weatherReport) => weatherReport.postcode === postcode);
 	}
 }

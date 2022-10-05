@@ -1,5 +1,6 @@
-import { Controller, Get, Param } from '@nestjs/common';
-import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { Controller, Get, Param, Query } from '@nestjs/common';
+import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { WeatherReportsByPostcodeDto } from './dto/weather-reports-by-postcode.dto';
 import { WeatherReport } from './entities/weather-report.entity';
 import { WeatherReportsService } from './weather-reports.service';
 
@@ -16,7 +17,7 @@ export class WeatherReportsController {
 
 	@ApiOkResponse({ type: WeatherReport, isArray: true })
 	@Get(':postcode')
-	getWeatherReportsByPostCode(@Param('postcode') postcode: string): WeatherReport[] {
-		return this.weatherReportsService.findByPostcode(postcode);
+	getWeatherReportsByPostCode(@Param('postcode') postcode: string, @Query() weatherReportsByPostcodeDto: WeatherReportsByPostcodeDto): WeatherReport[] {
+		return this.weatherReportsService.findByPostcode(postcode, new Date(weatherReportsByPostcodeDto.from), new Date(weatherReportsByPostcodeDto.to));
 	}
 }
