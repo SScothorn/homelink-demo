@@ -16,6 +16,12 @@ export class WeatherReportsService {
 		return this.weatherReports;
 	}
 
+	/**
+	 * Finds all weather reports for a post code. Filters based on any provided date-time paramaters.
+	 * @param postcode
+	 * @param from Weather reports from this date-time (inclusive)
+	 * @param to Weather reports up to this date-time (exclusive)
+	 */
 	findByPostcode(postcode: string, from?: Date, to?: Date): WeatherReport[] {
 		return this.weatherReports.filter((weatherReport) => {
 			return weatherReport.postcode === postcode && (from == null || weatherReport.dateTime >= from) && (to == null || weatherReport.dateTime < to);
