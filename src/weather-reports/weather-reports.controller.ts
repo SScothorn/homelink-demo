@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common';
 import { ApiBadRequestResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { WeatherReportsByPostcodeDto } from './dto/weather-reports-by-postcode.dto';
 import { WeatherReport } from './entities/weather-report.entity';
@@ -9,16 +9,16 @@ import { WeatherReportsService } from './weather-reports.service';
 export class WeatherReportsController {
 	constructor(private weatherReportsService: WeatherReportsService) {}
 
-	@ApiOkResponse({ type: Array<WeatherReport>, isArray: true })
+	@ApiOkResponse({ type: WeatherReport, isArray: true })
 	@Get()
-	getWeatherReports(): WeatherReport[] {
+	async getWeatherReports(): Promise<WeatherReport[]> {
 		return this.weatherReportsService.findAll();
 	}
 
 	@ApiOkResponse({ type: WeatherReport, isArray: true })
 	@ApiBadRequestResponse()
 	@Get(':postcode')
-	getWeatherReportsByPostCode(@Param('postcode') postcode: string, @Query() weatherReportsByPostcodeDto: WeatherReportsByPostcodeDto): WeatherReport[] {
+	async getWeatherReportsByPostCode(@Param('postcode') postcode: string, @Query() weatherReportsByPostcodeDto: WeatherReportsByPostcodeDto): Promise<WeatherReport[]> {
 		const from = weatherReportsByPostcodeDto.from ? new Date(weatherReportsByPostcodeDto.from) : null;
 		const to = weatherReportsByPostcodeDto.to ? new Date(weatherReportsByPostcodeDto.to) : null;
 		return this.weatherReportsService.findByPostcode(postcode, from, to);
