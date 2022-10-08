@@ -21,6 +21,6 @@ export class WeatherReportsController {
 	async getWeatherReportsByPostCode(@Param('postcode') postcode: string, @Query() weatherReportsByPostcodeDto: WeatherReportsByPostcodeDto): Promise<WeatherReport[]> {
 		const from = weatherReportsByPostcodeDto.from ? new Date(weatherReportsByPostcodeDto.from) : null;
 		const to = weatherReportsByPostcodeDto.to ? new Date(weatherReportsByPostcodeDto.to) : null;
-		return this.weatherReportsService.findByPostcode(postcode, from, to);
+		return this.weatherReportsService.getWeatherReportsByPostCode(postcode, from, to);
 	}
 }
