@@ -1,7 +1,7 @@
-import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import { ApiBadRequestResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { WeatherReportsByPostcodeDto } from './dto/weather-reports-by-postcode.dto';
-import { WeatherReport } from './entities/weather-report.entity';
+import { WeatherReport } from './models/weather-report.model';
 import { WeatherReportsService } from './weather-reports.service';
 
 @ApiTags('Weather Reports')

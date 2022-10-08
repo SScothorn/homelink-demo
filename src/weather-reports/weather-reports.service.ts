@@ -1,15 +1,16 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { WeatherReport } from './entities/weather-report.entity';
+import { Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/sequelize';
+import { WeatherReport } from './models/weather-report.model';
 
 @Injectable()
 export class WeatherReportsService {
 	constructor(
-		@Inject('WEATHER_REPORTS_REPOSITORY')
-		private weatherReportsRepository: typeof WeatherReport,
+		@InjectModel(WeatherReport)
+		private model: typeof WeatherReport,
 	) {}
 
 	async findAll(): Promise<WeatherReport[]> {
-		return this.weatherReportsRepository.findAll<WeatherReport>();
+		return this.model.findAll<WeatherReport>();
 	}
 
 	/**
@@ -22,6 +23,6 @@ export class WeatherReportsService {
 		// return this.weatherReports.filter((weatherReport) => {
 		// 	return weatherReport.postcode === postcode && (from == null || weatherReport.dateTime >= from) && (to == null || weatherReport.dateTime < to);
 		// });
-		return this.weatherReportsRepository.findAll<WeatherReport>();
+		return this.model.findAll<WeatherReport>();
 	}
 }
