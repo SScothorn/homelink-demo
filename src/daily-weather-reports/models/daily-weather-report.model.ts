@@ -8,6 +8,7 @@ export class DailyWeatherReport extends Model {
 	@Column({ allowNull: false })
 	postcode: string;
 
+	@ApiProperty({ type: HourlyWeatherReport, isArray: true })
 	@HasMany(() => HourlyWeatherReport)
 	hourlyWeatherReports: HourlyWeatherReport[];
 

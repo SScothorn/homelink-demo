@@ -5,6 +5,7 @@ import { DailyWeatherReportsModule } from './daily-weather-reports/daily-weather
 import { SequelizeModule } from '@nestjs/sequelize';
 import { HourlyWeatherReportsModule } from './hourly-weather-reports/hourly-weather-reports.module';
 import { WeatherApiModule } from './weather-api/weather-api.module';
+import { WeatherReportsModule } from './weather-reports/weather-reports.module';
 import config from 'config';
 const { db } = config;
 
@@ -23,6 +24,7 @@ const { db } = config;
 		DailyWeatherReportsModule,
 		HourlyWeatherReportsModule,
 		WeatherApiModule,
+		WeatherReportsModule,
 	],
 	controllers: [AppController],
 	providers: [AppService],
