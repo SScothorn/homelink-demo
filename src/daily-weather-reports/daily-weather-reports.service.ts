@@ -1,17 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Op } from 'sequelize';
-import { WeatherReport } from './models/weather-report.model';
+import { DailyWeatherReport } from './models/daily-weather-report.model';
 
 @Injectable()
-export class WeatherReportsService {
+export class DailyWeatherReportsService {
 	constructor(
-		@InjectModel(WeatherReport)
-		private model: typeof WeatherReport,
+		@InjectModel(DailyWeatherReport)
+		private model: typeof DailyWeatherReport,
 	) {}
 
-	async findAll(): Promise<WeatherReport[]> {
-		return this.model.findAll<WeatherReport>();
+	async findAll(): Promise<DailyWeatherReport[]> {
+		return this.model.findAll<DailyWeatherReport>();
 	}
 
 	/**
@@ -21,11 +21,11 @@ export class WeatherReportsService {
 	 * @param from Weather reports from this date-time (inclusive)
 	 * @param to Weather reports up to this date-time (exclusive)
 	 */
-	async getWeatherReportsByPostCode(postcode: string, from?: Date, to?: Date): Promise<WeatherReport[]> {
+	async getDailyWeatherReportsByPostCode(postcode: string, from?: Date, to?: Date): Promise<DailyWeatherReport[]> {
 		// Validate params
 
 		// Find all existing results
-		const existingWeatherReports = await this.model.findAll<WeatherReport>({
+		const existingDailyWeatherReports = await this.model.findAll<DailyWeatherReport>({
 			where: {
 				postcode: { [Op.iLike]: postcode },
 				...(from && {
@@ -45,6 +45,6 @@ export class WeatherReportsService {
 
 		// Return results
 
-		return this.model.findAll<WeatherReport>();
+		return this.model.findAll<DailyWeatherReport>();
 	}
 }

@@ -1,10 +1,9 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { WeatherReportsModule } from './weather-reports/weather-reports.module';
+import { DailyWeatherReportsModule } from './daily-weather-reports/daily-weather-reports.module';
 import { SequelizeModule } from '@nestjs/sequelize';
 import config from 'config';
-import { WeatherReport } from './weather-reports/models/weather-report.model';
 const { db } = config;
 
 @Module({
@@ -16,9 +15,10 @@ const { db } = config;
 			username: db.username,
 			password: db.password,
 			database: db.database,
-			models: [WeatherReport],
+			autoLoadModels: true,
+			synchronize: true,
 		}),
-		WeatherReportsModule,
+		DailyWeatherReportsModule,
 	],
 	controllers: [AppController],
 	providers: [AppService],
