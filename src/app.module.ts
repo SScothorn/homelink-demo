@@ -6,21 +6,29 @@ import { SequelizeModule } from '@nestjs/sequelize';
 import { HourlyWeatherReportsModule } from './hourly-weather-reports/hourly-weather-reports.module';
 import { WeatherApiModule } from './weather-api/weather-api.module';
 import { WeatherReportsModule } from './weather-reports/weather-reports.module';
-import config from 'config';
+import configuration from 'config/configuration';
 import { HttpModule, HttpService } from '@nestjs/axios';
-const { db } = config;
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { config } from 'rxjs';
 
 @Module({
 	imports: [
-		SequelizeModule.forRoot({
-			dialect: db.dialect,
-			host: db.host,
-			port: db.port,
-			username: db.username,
-			password: db.password,
-			database: db.database,
-			autoLoadModels: true,
-			synchronize: true,
+		ConfigModule.forRoot({
+			load: [configuration],
+		}),
+		SequelizeModule.forRootAsync({
+			imports: [ConfigModule],
+			useFactory: (ConfigService: ConfigService) => ({
+				dialect: ConfigService.get('db').dialect,
+				host: ConfigService.get('db').host,
+				port: ConfigService.get('db').port,
+				username: ConfigService.get('db').username,
+				password: ConfigService.get('db').password,
+				database: ConfigService.get('db').database,
+				autoLoadModels: true,
+				synchronize: true,
+			}),
+			inject: [ConfigService],
 		}),
 		DailyWeatherReportsModule,
 		HourlyWeatherReportsModule,
@@ -34,6 +42,9 @@ const { db } = config;
 export class AppModule {
 	constructor(private readonly httpService: HttpService) {}
 	onModuleInit() {
-		this.httpService.axiosRef.interceptors.request.use((config) => console.log(config));
+		this.httpService.axiosRef.interceptors.request.use((config) => {
+			console.log(config);
+			return config;
+		});
 	}
 }
