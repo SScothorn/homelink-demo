@@ -42,9 +42,10 @@ import { config } from 'rxjs';
 export class AppModule {
 	constructor(private readonly httpService: HttpService) {}
 	onModuleInit() {
-		this.httpService.axiosRef.interceptors.request.use((config) => {
-			console.log(config);
-			return config;
-		});
+		// // Log info for http requests
+		// this.httpService.axiosRef.interceptors.request.use((config) => {
+		// 	console.log(config);
+		// 	return config;
+		// });
 	}
 }
