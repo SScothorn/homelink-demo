@@ -45,6 +45,6 @@ export class DailyWeatherReportsService {
 
 		// Return results
 
-		return this.model.findAll<DailyWeatherReport>();
+		return existingDailyWeatherReports;
 	}
 }

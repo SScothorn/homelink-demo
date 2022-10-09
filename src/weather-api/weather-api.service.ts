@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { AxiosResponse } from 'axios';
-import { Observable } from 'rxjs';
+import { lastValueFrom, Observable } from 'rxjs';
 import config from 'config';
+import { IWeatherApiResponse } from './interfaces/weather-api-response.interface';
 
 @Injectable()
 export class WeatherApiService {
@@ -13,12 +14,16 @@ export class WeatherApiService {
 	 * @param postcode
 	 * @returns
 	 */
-	getWeatherReportForPostcode(postcode: string): Observable<AxiosResponse<any[]>> {
+	getWeatherReportForPostcode(postcode: string): Promise<AxiosResponse<IWeatherApiResponse>> {
 		// Param definitions:
 		// key = api key
 		// q = location
 		// tp = time interval
 		// format = format of response
-		return this.httpService.get('http://localhost:3000/cats', { params: { key: config.weatherAPIKey, q: postcode, tp: 1, format: 'json' } });
+		return lastValueFrom(
+			this.httpService.get('http://api.worldweatheronline.com/premium/v1/weather.ashx', {
+				params: { key: process.env.API_KEY_WORLD_WEATHER_ONLINE, q: postcode, tp: 1, format: 'json' },
+			}),
+		);
 	}
 }

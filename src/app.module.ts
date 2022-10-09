@@ -7,6 +7,7 @@ import { HourlyWeatherReportsModule } from './hourly-weather-reports/hourly-weat
 import { WeatherApiModule } from './weather-api/weather-api.module';
 import { WeatherReportsModule } from './weather-reports/weather-reports.module';
 import config from 'config';
+import { HttpModule, HttpService } from '@nestjs/axios';
 const { db } = config;
 
 @Module({
@@ -25,8 +26,14 @@ const { db } = config;
 		HourlyWeatherReportsModule,
 		WeatherApiModule,
 		WeatherReportsModule,
+		HttpModule,
 	],
 	controllers: [AppController],
 	providers: [AppService],
 })
-export class AppModule {}
+export class AppModule {
+	constructor(private readonly httpService: HttpService) {}
+	onModuleInit() {
+		this.httpService.axiosRef.interceptors.request.use((config) => console.log(config));
+	}
+}
