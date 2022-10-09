@@ -1,17 +1,21 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Column, Model, Table } from 'sequelize-typescript';
+import { Column, DataType, HasMany, Model, Table } from 'sequelize-typescript';
+import { HourlyWeatherReport } from 'src/hourly-weather-reports/models/hourly-weather-report.model';
 
 @Table
 export class DailyWeatherReport extends Model {
-	// @ApiProperty()
-	// @Column
-	// id: number;
-
 	@ApiProperty()
-	@Column
+	@Column({ allowNull: false })
 	postcode: string;
 
+	@HasMany(() => HourlyWeatherReport)
+	hourlyWeatherReports: HourlyWeatherReport[];
+
 	@ApiProperty()
-	@Column
-	dateTime: Date;
+	@Column({ type: DataType.DATEONLY, allowNull: false })
+	date: Date;
+
+	@ApiProperty()
+	@Column({ allowNull: false })
+	data: string;
 }
