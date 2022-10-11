@@ -1,6 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDateString, IsOptional } from 'class-validator';
+import { IsDateString, IsOptional, IsPostalCode } from 'class-validator';
 export class WeatherReportsByPostcodeDto {
+	@ApiProperty({ required: true })
+	@IsPostalCode('GB')
+	postcode: string;
+
 	@IsOptional()
 	@ApiProperty({ required: false, description: 'Weather reports from this date-time (inclusive)', format: 'date-time' })
 	@IsDateString()

@@ -1,5 +1,6 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import { Controller, Get, Query } from '@nestjs/common';
 import { ApiBadRequestResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { formatPostcode } from 'util/postcode.util';
 import { WeatherReportsByPostcodeDto } from './dto/weather-reports-by-postcode.dto';
 import { WeatherReport } from './models/weather-report.model';
 import { WeatherReportsService } from './weather-reports.service';
@@ -11,8 +12,10 @@ export class WeatherReportsController {
 
 	@ApiOkResponse({ type: WeatherReport })
 	@ApiBadRequestResponse()
-	@Get(':postcode')
-	async getWeatherReportsByPostCode(@Param('postcode') postcode: string, @Query() weatherReportsByPostcodeDto: WeatherReportsByPostcodeDto): Promise<WeatherReport> {
+	@Get()
+	async getWeatherReportsByPostCode(@Query() weatherReportsByPostcodeDto: WeatherReportsByPostcodeDto): Promise<WeatherReport> {
+		const postcode = formatPostcode(weatherReportsByPostcodeDto.postcode);
+
 		const from = weatherReportsByPostcodeDto.from ? new Date(weatherReportsByPostcodeDto.from) : undefined;
 		const to = weatherReportsByPostcodeDto.to ? new Date(weatherReportsByPostcodeDto.to) : undefined;
 		return this.WeatherReportsService.getWeatherReportsByPostCode(postcode, from, to);
