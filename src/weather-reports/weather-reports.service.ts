@@ -35,7 +35,7 @@ export class WeatherReportsService {
 
 		// Validate params
 		from = from != null ? clamp(from, { start: minimumDate, end: maximumDate }) : minimumDate;
-		to = to != null ? clamp(to, { start: minimumDate, end: maximumDate }) : to;
+		to = to != null ? clamp(to, { start: minimumDate, end: maximumDate }) : maximumDate;
 
 		// Get the unformatted weather reports
 		let reports = await this.DailyWeatherReportsService.getDailyWeatherReportsByPostCode(postcode, from, to);
