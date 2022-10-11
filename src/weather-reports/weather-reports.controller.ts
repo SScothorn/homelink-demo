@@ -13,8 +13,8 @@ export class WeatherReportsController {
 	@ApiBadRequestResponse()
 	@Get(':postcode')
 	async getWeatherReportsByPostCode(@Param('postcode') postcode: string, @Query() weatherReportsByPostcodeDto: WeatherReportsByPostcodeDto): Promise<WeatherReport> {
-		const from = weatherReportsByPostcodeDto.from ? new Date(weatherReportsByPostcodeDto.from) : null;
-		const to = weatherReportsByPostcodeDto.to ? new Date(weatherReportsByPostcodeDto.to) : null;
+		const from = weatherReportsByPostcodeDto.from ? new Date(weatherReportsByPostcodeDto.from) : undefined;
+		const to = weatherReportsByPostcodeDto.to ? new Date(weatherReportsByPostcodeDto.to) : undefined;
 		return this.WeatherReportsService.getWeatherReportsByPostCode(postcode, from, to);
 	}
 }

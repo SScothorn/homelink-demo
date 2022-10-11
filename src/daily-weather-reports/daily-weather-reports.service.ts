@@ -61,7 +61,12 @@ export class DailyWeatherReportsService {
 						...(to && { [Op.lt]: to }),
 					},
 				},
+				order: [['time', 'asc']],
 			},
+			order: [
+				['date', 'asc'],
+				[{ model: HourlyWeatherReport, as: 'hourlyWeatherReports' }, 'time', 'asc'],
+			],
 		});
 	}
 }

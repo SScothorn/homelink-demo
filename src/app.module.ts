@@ -9,7 +9,6 @@ import { WeatherReportsModule } from './weather-reports/weather-reports.module';
 import configuration from 'config/configuration';
 import { HttpModule, HttpService } from '@nestjs/axios';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { config } from 'rxjs';
 
 @Module({
 	imports: [

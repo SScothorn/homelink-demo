@@ -7,9 +7,10 @@ import { UpsertHourlyWeatherReportDto } from 'src/hourly-weather-reports/dto/ups
 import { IWeatherApiDailyResponse } from 'src/weather-api/interfaces/weather-api-response.interface';
 import { WeatherApiService } from 'src/weather-api/weather-api.service';
 import { WeatherReport } from './models/weather-report.model';
-import { addHours, isEqual } from 'date-fns';
+import { addDays, addHours, clamp, isEqual, subHours } from 'date-fns';
 import { HourlyWeatherReportsService } from 'src/hourly-weather-reports/hourly-weather-reports.service';
 import { UpsertDailyWeatherReportDto } from 'src/daily-weather-reports/dto/upsert-daily-weather-report.dto';
+import { findAllDaysBetween2Dates, findAllHoursBetween2Dates, roundUpToHour } from 'util/date.util';
 
 @Injectable()
 export class WeatherReportsService {
@@ -19,19 +20,27 @@ export class WeatherReportsService {
 		private HourlyWeatherReportsService: HourlyWeatherReportsService,
 		private WeatherAPIService: WeatherApiService,
 	) {}
+
+	private readonly MAX_FORECAST_IN_DAYS = 14;
+
 	/**
 	 * Gets the weather reports for a post code, and formats it to return.
 	 * @param postcode
-	 * @param from Weather reports from this date-time (inclusive)
-	 * @param to Weather reports up to this date-time (exclusive)
+	 * @param from Weather reports from this date-time (inclusive). Defaults to now.
+	 * @param to Weather reports up to this date-time (exclusive). Defaults to now + 13 days.
 	 */
 	async getWeatherReportsByPostCode(postcode: string, from?: Date, to?: Date): Promise<WeatherReport> {
+		const minimumDate = new Date();
+		const maximumDate = addDays(new Date(minimumDate.toDateString()), this.MAX_FORECAST_IN_DAYS);
+
 		// Validate params
+		from = from != null ? clamp(from, { start: minimumDate, end: maximumDate }) : minimumDate;
+		to = to != null ? clamp(to, { start: minimumDate, end: maximumDate }) : to;
 
 		// Get the unformatted weather reports
 		let reports = await this.DailyWeatherReportsService.getDailyWeatherReportsByPostCode(postcode, from, to);
 
-		if (this.isMissingReports(reports)) {
+		if (this.isMissingReports(reports, from, to)) {
 			await this.addMissingReports(postcode, reports);
 			// Get the updated results
 			reports = await this.DailyWeatherReportsService.getDailyWeatherReportsByPostCode(postcode, from, to);
@@ -46,19 +55,72 @@ export class WeatherReportsService {
 	/**
 	 * Checks whether any results are missing for the reports stored in the db.
 	 */
-	private isMissingReports(reports: DailyWeatherReport[]): boolean {
+	private isMissingReports(dailyReports: DailyWeatherReport[], from: Date, to: Date): boolean {
 		// If no results, then all results are missing
-		if (!reports?.length) {
+		if (!dailyReports?.length) {
 			return true;
 		}
-		return true;
 
-		// Check if all results are present
+		// I've included 2 methods for checking for missing reports.
+		// Option 1 checks by iterating through and checking each report exists
+		if (this.isMissingReportsIterativeMethod(dailyReports, from, to)) {
+			return true;
+		}
 
-		// Option 1 - iterate through and check every expect one is present
+		// Option 2 only checks the very last report. Due to how reports are stored, unless a report is manually deleted in the db,
+		// if the last report is present there should be no way for any of the reports prior to it to be missing.
+		if (this.isMissingReportsLastTimeMethod(dailyReports, to)) {
+			return true;
+		}
 
-		// Option 2 - check the very last daily and hourly report exists. If they are present, there is no reason the reports shouldn't be there.
+		return false;
+	}
+
+	/**
+	 * Checks if all results are present
+	 * Option 1 - iterate through and check every expect one is present
+	 * This is slower but more thorough.
+	 */
+	private isMissingReportsIterativeMethod(dailyReports: DailyWeatherReport[], from: Date, to: Date): boolean {
+		// Iterate through days first as quicker than going through by the hours
+		const allExpectedDays = findAllDaysBetween2Dates(from, to);
+		if (allExpectedDays.length !== dailyReports.length) {
+			return true;
+		}
+		allExpectedDays.forEach((expectedDay, i) => {
+			if (!isEqual(expectedDay, new Date(dailyReports[i].date))) {
+				return true;
+			}
+		});
+
+		const allExpectedHours = findAllHoursBetween2Dates(from, to);
+		const allExistingHours = dailyReports.flatMap((dailyReport) => dailyReport.hourlyWeatherReports).map((hourlyReport) => hourlyReport.time);
+		if (allExpectedHours.length !== allExistingHours.length) {
+			return true;
+		}
+		allExpectedHours.forEach((expectedHour, i) => {
+			if (!isEqual(expectedHour, allExistingHours[i])) {
+				return true;
+			}
+		});
+	}
+
+	/**
+	 * Option 2 - check the very last daily and hourly report exists. If they are present, there is no reason the other reports shouldn't be there.
+	 * Is a less thorough but quicker way of checking.
+	 */
+	private isMissingReportsLastTimeMethod(dailyReports: DailyWeatherReport[], to: Date): boolean {
+		// Option 2 - check the very last daily and hourly report exists. If they are present, there is no reason the other reports shouldn't be there.
 		// Is a less thorough but quicker way of checking.
+		// Round up and subtract one hour to handle situations where 'to' is exactly on the hour, as return is exclusive of 'to'
+		const lastExpectedHour = subHours(new Date(roundUpToHour(to.getTime())), 1);
+		const lastDaysHourlyReports = dailyReports?.at(-1)?.hourlyWeatherReports;
+		if (!isEqual(lastDaysHourlyReports?.at(-1)?.time, lastExpectedHour)) {
+			console.log('____');
+			console.log(`${lastDaysHourlyReports?.at(-1)?.time}`);
+			console.log(`${lastExpectedHour}`);
+			return true;
+		}
 	}
 
 	/**
