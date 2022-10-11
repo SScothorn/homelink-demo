@@ -14,7 +14,7 @@ export class DailyWeatherReport extends Model {
 
 	@ApiProperty()
 	@Column({ type: DataType.DATEONLY, allowNull: false })
-	date: Date;
+	date: string;
 
 	@ApiProperty()
 	@Column({ allowNull: false })

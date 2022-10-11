@@ -5,12 +5,12 @@ import { DailyWeatherReport } from 'src/daily-weather-reports/models/daily-weath
 @Table
 export class HourlyWeatherReport extends Model {
 	@ApiProperty()
-	@Column({ allowNull: false })
+	@Column({ allowNull: false, unique: 'compositeIndex' })
 	@ForeignKey(() => DailyWeatherReport)
 	dailyWeatherReportId: number;
 
 	@ApiProperty()
-	@Column({ type: DataType.TIME, allowNull: false })
+	@Column({ type: DataType.DATE, allowNull: false, unique: 'compositeIndex' })
 	time: Date;
 
 	@ApiProperty()

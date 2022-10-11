@@ -5,7 +5,10 @@ export interface IWeatherApiResponse {
 }
 
 export interface IWeatherApiDailyResponse {
+	date: string;
 	hourly: IWeatherApiHourlyResponse[];
 }
 
-export interface IWeatherApiHourlyResponse {}
+export interface IWeatherApiHourlyResponse {
+	time: string;
+}

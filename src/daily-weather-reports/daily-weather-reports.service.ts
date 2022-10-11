@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { Op } from 'sequelize';
+import { Op, Transaction } from 'sequelize';
+import { CreateDailyWeatherReportDto } from './dto/create-daily-weather-report.dto';
+import { UpsertDailyWeatherReportDto } from './dto/upsert-daily-weather-report.dto';
 import { DailyWeatherReport } from './models/daily-weather-report.model';
 
 @Injectable()
@@ -9,6 +11,27 @@ export class DailyWeatherReportsService {
 		@InjectModel(DailyWeatherReport)
 		private model: typeof DailyWeatherReport,
 	) {}
+	async create(createDailyWeatherReportDto: CreateDailyWeatherReportDto, transaction?: Transaction) {
+		return this.model.create(
+			{
+				postcode: createDailyWeatherReportDto.postcode,
+				date: createDailyWeatherReportDto.date,
+				data: createDailyWeatherReportDto.data,
+			},
+			{ transaction },
+		);
+	}
+
+	async upsert(upsertDailyWeatherReportDTO: UpsertDailyWeatherReportDto, transaction?: Transaction) {
+		await this.model.upsert(
+			{
+				postcode: upsertDailyWeatherReportDTO.postcode,
+				date: upsertDailyWeatherReportDTO.date,
+				data: upsertDailyWeatherReportDTO.data,
+			},
+			{ transaction },
+		);
+	}
 
 	async findAll(): Promise<DailyWeatherReport[]> {
 		return this.model.findAll<DailyWeatherReport>();

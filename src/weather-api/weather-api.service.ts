@@ -14,16 +14,17 @@ export class WeatherApiService {
 	 * @param postcode
 	 * @returns
 	 */
-	async getWeatherReportForPostcode(postcode: string): Promise<AxiosResponse<IWeatherApiResponse>> {
+	async getWeatherReportForPostcode(postcode: string): Promise<IWeatherApiResponse> {
 		// Param definitions:
 		// key = api key
 		// q = location
 		// tp = time interval
 		// format = format of response
-		return lastValueFrom(
+		const result = await lastValueFrom(
 			this.httpService.get('http://api.worldweatheronline.com/premium/v1/weather.ashx', {
 				params: { key: this.ConfigService.get('weatherAPIKey'), q: postcode, tp: 1, format: 'json' },
 			}),
 		);
+		return result.data;
 	}
 }
