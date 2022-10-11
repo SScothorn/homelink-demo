@@ -61,14 +61,17 @@ export class WeatherReportsService {
 		// Is a less thorough but quicker way of checking.
 	}
 
-	private async addMissingReports(postcode: string, existingReports: DailyWeatherReport[]) {
+	/**
+	 * Finds all all the available weather data for a post code from the 3rd party API, then stores in the db if it might be missing.
+	 */
+	private async addMissingReports(postcode: string, existingDailyReports: DailyWeatherReport[]) {
 		const newReports = await this.WeatherAPIService.getWeatherReportForPostcode(postcode);
 		try {
 			await this.sequelize.transaction(async (transaction) => {
 				await Promise.all(
 					newReports.data.weather.map(async (newDailyReport) => {
 						// See if there's an existing result
-						const existingDailyReport = existingReports.find((existingDailyReport) => isEqual(new Date(newDailyReport.date), new Date(existingDailyReport.date)));
+						const existingDailyReport = existingDailyReports.find((existingDailyReport) => isEqual(new Date(newDailyReport.date), new Date(existingDailyReport.date)));
 						await this.addMissingResult(postcode, newDailyReport, existingDailyReport, transaction);
 					}),
 				);
@@ -76,36 +79,39 @@ export class WeatherReportsService {
 		} catch (err) {
 			// Transaction has been rolled back
 			// err is whatever rejected the promise chain returned to the transaction callback
+			throw new Error(`Failed to add missing reports for ${postcode}`);
 		}
 	}
 
+	/**
+	 * Upserts the weather data we've retrieved into the 3rd Party API into our db. Upserts as it is not known if all the retrieved data is missing from our db.
+	 * Could get it from the db and compare but Upsert achieves the same. We don't upsert the data we know is in the db, and was brough down with the original request.
+	 */
 	async addMissingResult(postcode, newDailyReport: IWeatherApiDailyResponse, existingDailyWeatherReport: DailyWeatherReport, transaction: Transaction) {
-		let dailyWeatherReport = existingDailyWeatherReport;
 		const date = new Date(newDailyReport.date);
-		// If there's no existing result, add the day report
-		if (dailyWeatherReport == null) {
-			// Upsert daily
+		let dailyWeatherReportId = existingDailyWeatherReport?.id;
+
+		// If there's no existing day report, add it
+		if (existingDailyWeatherReport == null) {
 			const upsertDailyDTO = new UpsertDailyWeatherReportDto(postcode, date, '');
-			dailyWeatherReport = await this.DailyWeatherReportsService.upsert(upsertDailyDTO, transaction);
+			const newDailyWeatherReport = await this.DailyWeatherReportsService.upsert(upsertDailyDTO, transaction);
+			dailyWeatherReportId = newDailyWeatherReport.id;
 		}
 
-		// Upsert all hourly results not in the existing report.
-		// Upsert because to/from paramaters in queries means not all existing hourly reports may have been brought down with existingDailyWeatherReport
+		// Find the hourly reports that need to be upserted by filtering out the already existing ones from the new ones.
+		const hourlyReportToUpsert = newDailyReport.hourly.filter((newHourlyReport) => {
+			const existingHourlyReports = existingDailyWeatherReport?.hourlyWeatherReports ?? [];
+			const res = existingHourlyReports.findIndex((hourlyWeatherReport) => isEqual(hourlyWeatherReport.time, addHours(date, +newHourlyReport.time / 100)));
+			return res == -1;
+		});
+
+		// Upsert all hourly reports not in the existing report.
 		await Promise.all(
-			newDailyReport.hourly
-				// .filter((newHourlyReport) => {
-				// 	const res = dailyWeatherReport?.hourlyWeatherReports?.findIndex((hourlyWeatherReport) => {
-				// 		const existing = hourlyWeatherReport.time;
-				// 		const neww = addHours(date, +newHourlyReport.time / 100);
-				// 		hourlyWeatherReport.time == addHours(date, +newHourlyReport.time / 100);
-				// 	});
-				// 	return res == -1;
-				// })
-				.map(async (newHourlyReport) => {
-					const dateTime = addHours(date, +newHourlyReport.time / 100);
-					const upsertHourlyDTO: UpsertHourlyWeatherReportDto = new UpsertHourlyWeatherReportDto(dailyWeatherReport.id, dateTime, '');
-					await this.HourlyWeatherReportsService.upsert(upsertHourlyDTO, transaction);
-				}),
+			hourlyReportToUpsert.map(async (newHourlyReport) => {
+				const dateTime = addHours(date, +newHourlyReport.time / 100);
+				const upsertHourlyDTO: UpsertHourlyWeatherReportDto = new UpsertHourlyWeatherReportDto(dailyWeatherReportId, dateTime, '');
+				await this.HourlyWeatherReportsService.upsert(upsertHourlyDTO, transaction);
+			}),
 		);
 	}
 

@@ -41,7 +41,6 @@ export class DailyWeatherReportsService {
 
 	/**
 	 * Gets all stored weather reports for a post code. Filters based on any provided date-time paramaters.
-	 * If any are missing for the time period provided, it calls the worldweatheronline API and stores then returns the results.
 	 * @param postcode
 	 * @param from Weather reports from this date-time (inclusive)
 	 * @param to Weather reports up to this date-time (exclusive)
@@ -49,8 +48,7 @@ export class DailyWeatherReportsService {
 	async getDailyWeatherReportsByPostCode(postcode: string, from?: Date, to?: Date): Promise<DailyWeatherReport[]> {
 		// Validate params
 
-		// Find all existing results
-		const existingDailyWeatherReports = await this.model.findAll<DailyWeatherReport>({
+		return await this.model.findAll<DailyWeatherReport>({
 			where: {
 				postcode: { [Op.iLike]: postcode },
 			},
@@ -58,24 +56,12 @@ export class DailyWeatherReportsService {
 			include: {
 				model: HourlyWeatherReport,
 				where: {
-					...(from && {
-						time: {
-							[Op.gte]: from,
-						},
-					}),
-					...(to && {
-						time: {
-							[Op.lt]: to,
-						},
-					}),
+					time: {
+						...(from && { [Op.gte]: from }),
+						...(to && { [Op.lt]: to }),
+					},
 				},
 			},
 		});
-
-		// If missing results, get data from worldweatheronline API
-
-		// Return results
-
-		return existingDailyWeatherReports;
 	}
 }
