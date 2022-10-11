@@ -17,7 +17,7 @@ export class HourlyWeatherReportsService {
 	}
 
 	async upsert(upsertHourlyWeatherReportDTO: UpsertHourlyWeatherReportDto, transaction?: Transaction) {
-		await this.model.upsert(
+		const [result, created] = await this.model.upsert(
 			{
 				dailyWeatherReportId: upsertHourlyWeatherReportDTO.dailyWeatherReportId,
 				time: upsertHourlyWeatherReportDTO.time,
@@ -25,6 +25,8 @@ export class HourlyWeatherReportsService {
 			},
 			{ transaction },
 		);
+
+		return result;
 	}
 
 	findAll() {

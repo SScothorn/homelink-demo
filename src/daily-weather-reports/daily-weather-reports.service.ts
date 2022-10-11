@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Op, Transaction } from 'sequelize';
+import { HourlyWeatherReport } from 'src/hourly-weather-reports/models/hourly-weather-report.model';
 import { CreateDailyWeatherReportDto } from './dto/create-daily-weather-report.dto';
 import { UpsertDailyWeatherReportDto } from './dto/upsert-daily-weather-report.dto';
 import { DailyWeatherReport } from './models/daily-weather-report.model';
@@ -23,7 +24,7 @@ export class DailyWeatherReportsService {
 	}
 
 	async upsert(upsertDailyWeatherReportDTO: UpsertDailyWeatherReportDto, transaction?: Transaction) {
-		await this.model.upsert(
+		const [result, created] = await this.model.upsert(
 			{
 				postcode: upsertDailyWeatherReportDTO.postcode,
 				date: upsertDailyWeatherReportDTO.date,
@@ -31,6 +32,7 @@ export class DailyWeatherReportsService {
 			},
 			{ transaction },
 		);
+		return result;
 	}
 
 	async findAll(): Promise<DailyWeatherReport[]> {
@@ -51,16 +53,22 @@ export class DailyWeatherReportsService {
 		const existingDailyWeatherReports = await this.model.findAll<DailyWeatherReport>({
 			where: {
 				postcode: { [Op.iLike]: postcode },
-				...(from && {
-					dateTime: {
-						[Op.gte]: from,
-					},
-				}),
-				...(to && {
-					dateTime: {
-						[Op.lt]: to,
-					},
-				}),
+			},
+			// include: HourlyWeatherReport,
+			include: {
+				model: HourlyWeatherReport,
+				where: {
+					...(from && {
+						time: {
+							[Op.gte]: from,
+						},
+					}),
+					...(to && {
+						time: {
+							[Op.lt]: to,
+						},
+					}),
+				},
 			},
 		});
 
