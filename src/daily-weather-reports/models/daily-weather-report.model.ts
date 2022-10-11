@@ -5,7 +5,7 @@ import { HourlyWeatherReport } from 'src/hourly-weather-reports/models/hourly-we
 @Table
 export class DailyWeatherReport extends Model {
 	@ApiProperty()
-	@Column({ allowNull: false })
+	@Column({ allowNull: false, unique: 'compositeIndex' })
 	postcode: string;
 
 	@ApiProperty({ type: HourlyWeatherReport, isArray: true })
@@ -13,7 +13,7 @@ export class DailyWeatherReport extends Model {
 	hourlyWeatherReports: HourlyWeatherReport[];
 
 	@ApiProperty()
-	@Column({ type: DataType.DATEONLY, allowNull: false })
+	@Column({ type: DataType.DATE, allowNull: false, unique: 'compositeIndex' })
 	date: string;
 
 	@ApiProperty()
