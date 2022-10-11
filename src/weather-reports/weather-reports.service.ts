@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { Transaction } from 'sequelize';
 import { Sequelize } from 'sequelize-typescript';
 import { DailyWeatherReportsService } from 'src/daily-weather-reports/daily-weather-reports.service';
-import { CreateDailyWeatherReportDto } from 'src/daily-weather-reports/dto/create-daily-weather-report.dto';
 import { DailyWeatherReport } from 'src/daily-weather-reports/models/daily-weather-report.model';
 import { UpsertHourlyWeatherReportDto } from 'src/hourly-weather-reports/dto/upsert-hourly-weather-report.dto';
 import { IWeatherApiDailyResponse } from 'src/weather-api/interfaces/weather-api-response.interface';
@@ -10,8 +9,7 @@ import { WeatherApiService } from 'src/weather-api/weather-api.service';
 import { WeatherReport } from './models/weather-report.model';
 import { addHours, isEqual } from 'date-fns';
 import { HourlyWeatherReportsService } from 'src/hourly-weather-reports/hourly-weather-reports.service';
-import { async, from } from 'rxjs';
-import transaction from 'sequelize/types/transaction';
+import { UpsertDailyWeatherReportDto } from 'src/daily-weather-reports/dto/upsert-daily-weather-report.dto';
 
 @Injectable()
 export class WeatherReportsService {
@@ -86,9 +84,9 @@ export class WeatherReportsService {
 		const date = new Date(newDailyReport.date);
 		// If there's no existing result, add the day report
 		if (dailyWeatherReport == null) {
-			// Add daily
-			const createDailyDto = new CreateDailyWeatherReportDto(postcode, date, '');
-			dailyWeatherReport = await this.DailyWeatherReportsService.create(createDailyDto, transaction);
+			// Upsert daily
+			const upsertDailyDTO = new UpsertDailyWeatherReportDto(postcode, date, '');
+			dailyWeatherReport = await this.DailyWeatherReportsService.upsert(upsertDailyDTO, transaction);
 		}
 
 		// Upsert all hourly results not in the existing report.
@@ -96,10 +94,10 @@ export class WeatherReportsService {
 		await Promise.all(
 			newDailyReport.hourly
 				// .filter((newHourlyReport) => {
-				// 	const res = existingDailyWeatherReport.hourlyWeatherReports.findIndex((existingHourlyWeatherReport) => {
-				// 		const existing = existingHourlyWeatherReport.time;
+				// 	const res = dailyWeatherReport?.hourlyWeatherReports?.findIndex((hourlyWeatherReport) => {
+				// 		const existing = hourlyWeatherReport.time;
 				// 		const neww = addHours(date, +newHourlyReport.time / 100);
-				// 		existingHourlyWeatherReport.time == addHours(date, +newHourlyReport.time / 100);
+				// 		hourlyWeatherReport.time == addHours(date, +newHourlyReport.time / 100);
 				// 	});
 				// 	return res == -1;
 				// })
