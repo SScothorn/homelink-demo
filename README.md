@@ -32,7 +32,7 @@
 $ npm install
 ```
 
-## Running the app
+## Running the apps
 
 ```bash
 # development
@@ -43,6 +43,16 @@ $ npm run start:dev
 
 # production mode
 $ npm run start:prod
+```
+
+## Example Env File
+```bash
+NODE_ENV=development
+DB_USERNAME=postgres
+DB_PASSWORD=
+DB_HOST=
+DB_PORT=
+API_KEY_WORLD_WEATHER_ONLINE=
 ```
 
 ## Test
