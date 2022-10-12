@@ -155,7 +155,10 @@ export class WeatherReportsService {
 
 		// If there's no existing day report, add it
 		if (existingDailyWeatherReport == null) {
-			const upsertDailyDTO = new UpsertDailyWeatherReportDto(postcode, date, '');
+			// Store the data as a string for the same of this demo.
+			const data = { ...newDailyReport };
+			delete data?.hourly;
+			const upsertDailyDTO = new UpsertDailyWeatherReportDto(postcode, date, JSON.stringify(data));
 			const newDailyWeatherReport = await this.DailyWeatherReportsService.upsert(upsertDailyDTO, transaction);
 			dailyWeatherReportId = newDailyWeatherReport.id;
 		}
@@ -171,12 +174,16 @@ export class WeatherReportsService {
 		await Promise.all(
 			hourlyReportToUpsert.map(async (newHourlyReport) => {
 				const dateTime = addHours(date, +newHourlyReport.time / 100);
-				const upsertHourlyDTO: UpsertHourlyWeatherReportDto = new UpsertHourlyWeatherReportDto(dailyWeatherReportId, dateTime, '');
+				// Store the data as a string for the same of this demo.
+				const upsertHourlyDTO: UpsertHourlyWeatherReportDto = new UpsertHourlyWeatherReportDto(dailyWeatherReportId, dateTime, JSON.stringify(newHourlyReport));
 				await this.HourlyWeatherReportsService.upsert(upsertHourlyDTO, transaction);
 			}),
 		);
 	}
 
+	/**
+	 * Formats the reports into a a format appropriate for the front end.
+	 */
 	private formatDailyWeatherReports(postcode: string, from: Date, to: Date, dailyWeatherReports: DailyWeatherReport[]): WeatherReport {
 		return {
 			postcode,

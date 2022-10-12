@@ -17,6 +17,6 @@ export class DailyWeatherReport extends Model {
 	date: string;
 
 	@ApiProperty()
-	@Column({ allowNull: false })
+	@Column({ type: DataType.JSON, allowNull: false })
 	data: string;
 }

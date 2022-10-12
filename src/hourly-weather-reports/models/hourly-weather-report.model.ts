@@ -14,6 +14,6 @@ export class HourlyWeatherReport extends Model {
 	time: Date;
 
 	@ApiProperty()
-	@Column({ allowNull: false })
+	@Column({ type: DataType.JSON, allowNull: false })
 	data: string;
 }
